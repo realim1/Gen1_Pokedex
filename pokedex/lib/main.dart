@@ -23,6 +23,10 @@ class Pokemon{
   final String url;
   final String height;
   final String weight;
+  final String candy;
+  final int candyCount;
+  final List nextEvo;
+  final List prevEvo;
   final List type;
   final List weaknesses;
   //final double spawnChance;
@@ -35,7 +39,11 @@ class Pokemon{
     type = map['type'],
     height = map['height'],
     weight = map['weight'],
-    weaknesses = map['weaknesses'];
+    candy = map['candy'],
+    weaknesses = map['weaknesses'],
+    nextEvo = map['next_evolution'],
+    prevEvo = map['prev_evolution'],
+    candyCount = map['candy_count'];
     //spawnChance = map['spawn_chance'];
 
 }
@@ -124,20 +132,22 @@ class PokemonInfoPage extends StatelessWidget{
   @override
   PokemonInfoPage(this.pokemon);
   final Pokemon pokemon;
+  
 
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: getColor(pokemon.type[0]),
-        title:Text(pokemon.name)
+        title:Text(pokemon.name, style: TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold)),
         ),
       body: ListView(
         children: <Widget>[
-
+          /* Creates the Banner and Image of the pokemon of the listview */
           Stack(children: <Widget>[
 
             Container(
-              child: getImage(pokemon.type[0])
+              child: Center(
+                child:getImage(pokemon.type[0]))
             ),
             Container(
               padding: const EdgeInsets.only(top: 150.0),
@@ -148,18 +158,29 @@ class PokemonInfoPage extends StatelessWidget{
     
           ],),
           Container(
+            padding: const EdgeInsets.only(top:10.0),
+            child:Center(
+              child:Text('Type',
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              ),
+            )
+          ),
+
+          /* Creates the Type section of the listview */
+          Container(
             child: pokemon.type.length > 1 
-            ? Row(
+            ? 
+              Row(
               children: <Widget>[
                 Container(
-                  width: 200.0,
+                  width: 185.0,
                   child:Chip(
                     backgroundColor: getColor(pokemon.type[0]),
                     label: Center(child:Text(pokemon.type[0])),
                   )
                 ),
                 Container(
-                  width: 200.0,
+                  width: 185.0,
                   child:Chip(
                     backgroundColor: getColor(pokemon.type[1]),
                     label: Center(child:Text(pokemon.type[1])),
@@ -177,7 +198,310 @@ class PokemonInfoPage extends StatelessWidget{
             )
           )
             
+          ),
+          /* Creates height and weight sections of the listview */
+         Container(
+            padding: const EdgeInsets.only(top:20.0),
+            child:Row(
+              children: <Widget>[                
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 80.0),
+                  child: Column(
+                    children: <Widget>[
+                      Container( 
+                        child: Center(
+                          child: Text('Height', style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold),),
+                        ),
+                      ),
+                      
+                      Container(
+                        child: Center(
+                          child: Text(pokemon.height, style: TextStyle(fontSize: 18.0,),),
+                        ),
+                      )
+                    ],
+                  )
+                ),
+                Container(
+                  child: Column(
+                    children: <Widget>[
+                      Container( 
+                        child: Center(
+                          child: Text('Weight', style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold),),
+                        ),
+                      ),
+                      
+                      Container(
+                        child: Center(
+                          child: Text(pokemon.weight, style: TextStyle(fontSize: 18.0,),),
+                        ),
+                      )
+                    ],
+                  )
+                ),
+              ],
+            )
+         ),
+
+        /* Creates the type of Candy section of the listview */
+        Container(
+          padding: const EdgeInsets.only(top: 20.0),
+          child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                child: Column(
+                    children: <Widget>[
+                      Container( 
+                        child: Center(
+                          child: Text('Candy', style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold),),
+                        ),
+                      ),
+                      
+                      Container(
+                        child: Center(
+                          child: Text(pokemon.candy, style: TextStyle(fontSize: 18.0,),),
+                        ),
+                      )
+                    ],
+                  ),
+              ),
+        ),
+
+        /* Creates the Candy needed for evolution section of the listview */
+        Container(
+          padding: const EdgeInsets.only(top: 20.0),
+          child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                child: pokemon.candyCount != null 
+                ? Column(
+                    children: <Widget>[
+                      Container( 
+                        child: Center(
+                          child: Text('Candy for Evolution', style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold),),
+                        ),
+                      ),
+                      
+                      Container(
+                        child: Center(
+                          child: Text(pokemon.candyCount.toString(), style: TextStyle(fontSize: 18.0,),),
+                        ),
+                      )
+                    ],
+                  )
+                : null
+              ),
+        ),
+
+
+        /* Creates the Evolution Chart portion of the listview*/
+        Container(
+          padding: const EdgeInsets.only(top:20.0),
+          child: pokemon.prevEvo != null || pokemon.nextEvo != null
+          ?Center(
+            child: Text('Evolution Chart', style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),)
           )
+          :null
+        ),
+
+        
+        Container(
+          padding: const EdgeInsets.only(top: 10.0, right:20.0, left: 20.0),
+          child: pokemon.prevEvo != null || pokemon.nextEvo != null
+          ?Row(
+            children: pokemon.prevEvo == null && pokemon.nextEvo != null
+            ?pokemon.nextEvo.length == 1
+              ?<Widget>[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 55.0),
+                  child: Column(
+                    children: <Widget>[
+                      Center(
+                        child: Text(pokemon.name, style: TextStyle(fontWeight: FontWeight.bold),)
+                      ),
+                      Center(
+                        child: Text('#'+pokemon.idNum)
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 55.0),
+                  child: Column(
+                    children: <Widget>[
+                      Center(
+                        child: Text(pokemon.nextEvo[0]['name'])
+                      ),
+                      Center(
+                        child: Text('#'+pokemon.nextEvo[0]['num'])
+                      ),
+                    ],
+                  ),
+                ),
+              ]
+              :pokemon.nextEvo.length == 2
+                ?<Widget>[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                    child: Column(
+                      children: <Widget>[
+                        Center(
+                          child: Text(pokemon.name, style: TextStyle(fontWeight: FontWeight.bold),)
+                        ),
+                        Center(
+                          child: Text('#'+pokemon.idNum)
+                        ),
+                      ],
+                      ),
+                    ),
+                  Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                      child: Column(
+                        children: <Widget>[
+                          Center(
+                            child: Text(pokemon.nextEvo[0]['name'])
+                          ),
+                          Center(
+                            child: Text('#'+pokemon.nextEvo[0]['num'])
+                          ),
+                        ],
+                        ),
+                      ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                      child: Column(
+                        children: <Widget>[
+                          Center(
+                            child: Text(pokemon.nextEvo[1]['name'])
+                          ),
+                          Center(
+                            child: Text('#'+pokemon.nextEvo[1]['num'])
+                          ),
+                        ],
+                      ),
+                    ),
+                  ]
+                :null
+
+            :pokemon.prevEvo != null && pokemon.nextEvo == null       
+            ?pokemon.prevEvo.length == 1
+              ?<Widget>[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 55.0),
+                  child: Column(
+                    children: <Widget>[
+                      Center(
+                        child: Text(pokemon.prevEvo[0]['name'])
+                      ),
+                      Center(
+                        child: Text('#'+pokemon.prevEvo[0]['num'])
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 55.0),
+                  child: Column(
+                    children: <Widget>[
+                      Center(
+                        child: Text(pokemon.name, style: TextStyle(fontWeight: FontWeight.bold),)
+                      ),
+                      Center(
+                        child: Text('#'+pokemon.idNum)
+                      ),
+                    ],
+                  ),
+                ),
+              ]
+              : pokemon.prevEvo.length == 2
+              ?<Widget>[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  child: Column(
+                    children: <Widget>[
+                      Center(
+                        child: Text(pokemon.prevEvo[0]['name'])
+                      ),
+                      Center(
+                        child: Text('#'+pokemon.prevEvo[0]['num'])
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  child: Column(
+                    children: <Widget>[
+                      Center(
+                        child: Text(pokemon.prevEvo[1]['name'])
+                      ),
+                      Center(
+                        child: Text('#'+pokemon.prevEvo[1]['num'])
+                     ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  child: Column(
+                    children: <Widget>[
+                      Center(
+                        child: Text(pokemon.name, style: TextStyle(fontWeight: FontWeight.bold),)
+                      ),
+                      Center(
+                        child: Text('#'+pokemon.idNum)
+                      ),
+                    ],
+                  ),
+                ),
+              ]
+              :null
+
+            :pokemon.prevEvo != null && pokemon.nextEvo != null
+            ?<Widget>[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                child: Column(
+                  children: <Widget>[
+                    Center(
+                      child: Text(pokemon.prevEvo[0]['name'])
+                    ),
+                    Center(
+                      child: Text('#'+pokemon.prevEvo[0]['num'])
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                child: Column(
+                  children: <Widget>[
+                    Center(
+                      child: Text(pokemon.name, style: TextStyle(fontWeight: FontWeight.bold),)
+                    ),
+                    Center(
+                      child: Text('#'+pokemon.idNum)
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                child: Column(
+                  children: <Widget>[
+                    Center(
+                      child: Text(pokemon.nextEvo[0]['name'])
+                    ),
+                    Center(
+                      child: Text('#'+pokemon.nextEvo[0]['num'])
+                    ),
+                  ],
+                ),
+              ),
+            ]
+            :null
+          )
+          : null
+        )
+
         ],
 
       )
