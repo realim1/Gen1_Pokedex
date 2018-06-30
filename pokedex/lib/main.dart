@@ -3,11 +3,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:material_search/material_search.dart';
 
 
 void main() => 
   runApp(MaterialApp(
+  debugShowCheckedModeBanner: false,
   home: MyApp(),
 ));
 
@@ -17,40 +17,55 @@ class MyApp extends StatefulWidget{
   PokeDexState createState() => PokeDexState();
 }
 
+//Pokemon class that contains data on the Pokemon that is mapped from the Json file.
 class Pokemon{
+  final int id;
   final String name;
   final String idNum;
   final String url;
   final String height;
   final String weight;
   final String candy;
+  final String candyImg;
+  final String egg;
   final int candyCount;
   final List nextEvo;
   final List prevEvo;
   final List type;
   final List weaknesses;
-  //final double spawnChance;
+  final String spawnChance;
+  final String spawnTime;
 
 
   Pokemon.fromJsonMap(Map map)
-  : name = map['name'],
+  : id = map['id'],
+    name = map['name'],
     idNum = map['num'],
     url = map['img'],
     type = map['type'],
     height = map['height'],
     weight = map['weight'],
     candy = map['candy'],
+    candyImg = map['candy_img'],
     weaknesses = map['weaknesses'],
     nextEvo = map['next_evolution'],
     prevEvo = map['prev_evolution'],
-    candyCount = map['candy_count'];
-    //spawnChance = map['spawn_chance'];
+    egg = map['egg'],
+    candyCount = map['candy_count'],
+
+    spawnChance = map['spawn_chance'].toString(),
+    spawnTime = map['spawn_time'];
 
 }
 
+//Pokemon Page that contains the information the selected pokemon
 class PokemonInfoPage extends StatelessWidget{
   
+  /*
+  Function that returns a Color Widget based on the pokemon type.
 
+  Function takes in a String type that represents the pokemon's typing and chooses which Color to return.
+  */
   Color getColor(String type){
     if(type == 'Fire')
       return Color(0xFFED813A);
@@ -89,6 +104,12 @@ class PokemonInfoPage extends StatelessWidget{
     else
       return Color(0xFFEA9BAE);
   }
+
+  /*
+  Function that returns a Image widget based on the Pokemon's type
+
+  Function takes in a String type that represents the pokemon's typing and chooses which Image to return.
+  */
 
   Image getImage(String type){
       if(type == 'Fire')
@@ -130,9 +151,10 @@ class PokemonInfoPage extends StatelessWidget{
   }
   
   @override
-  PokemonInfoPage(this.pokemon);
-  final Pokemon pokemon;
+  PokemonInfoPage(this.pokemon, this.pokeList);
   
+  final Pokemon pokemon;
+  final List<Pokemon> pokeList;
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -142,7 +164,8 @@ class PokemonInfoPage extends StatelessWidget{
         ),
       body: ListView(
         children: <Widget>[
-          /* Creates the Banner and Image of the pokemon of the listview */
+
+          //Creates the Banner and Image of the pokemon of the listview 
           Stack(children: <Widget>[
 
             Container(
@@ -166,7 +189,7 @@ class PokemonInfoPage extends StatelessWidget{
             )
           ),
 
-          /* Creates the Type section of the listview */
+          // Creates the Type section of the listview
           Container(
             child: pokemon.type.length > 1 
             ? 
@@ -199,7 +222,93 @@ class PokemonInfoPage extends StatelessWidget{
           )
             
           ),
-          /* Creates height and weight sections of the listview */
+
+          //Creates the Weaknesses section of the listview
+          Container(
+            padding: const EdgeInsets.only(top: 20.0),
+            child: Center(
+              child:Text('Weaknesses',
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              ),
+            )
+          ),
+
+          Container(
+            child: pokemon.weaknesses.length > 1
+            ?Column(
+              children: <Widget>[
+
+                Container(
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                        width: 185.0,
+                        child:Chip(
+                          backgroundColor: getColor(pokemon.weaknesses[0]),
+                          label: Center(child:Text(pokemon.weaknesses[0]))
+                        )
+                      ),
+                      Container(
+                        width: 185.0,
+                        child:Chip(
+                          backgroundColor: getColor(pokemon.weaknesses[1]),
+                          label: Center(child:Text(pokemon.weaknesses[1]))
+                        )
+                      ),
+                    ],
+                  )
+                ),
+
+                Container(
+                  child: pokemon.weaknesses.length == 4
+                  ?Row(
+                    children: <Widget>[
+                      Container(
+                        width: 185.0,
+                        child:Chip(
+                          backgroundColor: getColor(pokemon.weaknesses[2]),
+                          label: Center(child:Text(pokemon.weaknesses[2]))
+                        )
+                      ),
+                      Container(
+                        width: 185.0,
+                        child:Chip(
+                          backgroundColor: getColor(pokemon.weaknesses[3]),
+                          label: Center(child:Text(pokemon.weaknesses[3]))
+                        )
+                      ),
+                    ],
+                  )
+                : pokemon.weaknesses.length == 3
+                ?Row(
+                    children: <Widget>[
+                      Container(
+                        width: 185.0,
+                        child:Chip(
+                          backgroundColor: getColor(pokemon.weaknesses[2]),
+                          label: Center(child:Text(pokemon.weaknesses[2]))
+                        )
+                      ),
+                     
+                    ],
+                  )
+                :null
+                ),
+                
+              ],
+            )
+            :Center(
+              child: Container(
+                width: 200.0,
+                child:Chip(
+                  backgroundColor: getColor(pokemon.weaknesses[0]),
+                  label: Center(child:Text(pokemon.weaknesses[0]))
+              )
+            )
+            )
+          ),
+
+          // Creates height and weight sections of the listview
          Container(
             padding: const EdgeInsets.only(top:20.0),
             child:Row(
@@ -243,7 +352,7 @@ class PokemonInfoPage extends StatelessWidget{
             )
          ),
 
-        /* Creates the type of Candy section of the listview */
+        // Creates the type of Candy section of the listview
         Container(
           padding: const EdgeInsets.only(top: 20.0),
           child: Container(
@@ -253,6 +362,14 @@ class PokemonInfoPage extends StatelessWidget{
                       Container( 
                         child: Center(
                           child: Text('Candy', style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold),),
+                        ),
+                      ),
+
+                      Container( 
+                        width: 40.0,
+                        height: 40.0,
+                        child: Center(
+                          child: Image.network(pokemon.candyImg)
                         ),
                       ),
                       
@@ -266,7 +383,7 @@ class PokemonInfoPage extends StatelessWidget{
               ),
         ),
 
-        /* Creates the Candy needed for evolution section of the listview */
+        // Creates the Candy needed for evolution section of the listview
         Container(
           padding: const EdgeInsets.only(top: 20.0),
           child: Container(
@@ -284,7 +401,8 @@ class PokemonInfoPage extends StatelessWidget{
                         child: Center(
                           child: Text(pokemon.candyCount.toString(), style: TextStyle(fontSize: 18.0,),),
                         ),
-                      )
+                      ),
+
                     ],
                   )
                 : null
@@ -304,7 +422,7 @@ class PokemonInfoPage extends StatelessWidget{
 
         
         Container(
-          padding: const EdgeInsets.only(top: 10.0, right:20.0, left: 20.0),
+          padding: const EdgeInsets.all(10.0),
           child: pokemon.prevEvo != null || pokemon.nextEvo != null
           ?Row(
             children: pokemon.prevEvo == null && pokemon.nextEvo != null
@@ -320,6 +438,12 @@ class PokemonInfoPage extends StatelessWidget{
                       Center(
                         child: Text('#'+pokemon.idNum)
                       ),
+                      Center(
+                        child: Container(
+                          width: 60.0,
+                          height: 60.0,
+                          child:Image.network(pokemon.url))
+                      )
                     ],
                   ),
                 ),
@@ -333,6 +457,12 @@ class PokemonInfoPage extends StatelessWidget{
                       Center(
                         child: Text('#'+pokemon.nextEvo[0]['num'])
                       ),
+                      Center(
+                        child: Container(
+                          width: 60.0,
+                          height: 60.0,
+                          child:Image.network(pokeList[pokemon.id].url))
+                      )
                     ],
                   ),
                 ),
@@ -340,7 +470,7 @@ class PokemonInfoPage extends StatelessWidget{
               :pokemon.nextEvo.length == 2
                 ?<Widget>[
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Column(
                       children: <Widget>[
                         Center(
@@ -349,11 +479,17 @@ class PokemonInfoPage extends StatelessWidget{
                         Center(
                           child: Text('#'+pokemon.idNum)
                         ),
+                        Center(
+                          child: Container(
+                            width: 60.0,
+                            height: 60.0,
+                            child:Image.network(pokemon.url))
+                        )
                       ],
                       ),
                     ),
                   Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: Column(
                         children: <Widget>[
                           Center(
@@ -362,11 +498,17 @@ class PokemonInfoPage extends StatelessWidget{
                           Center(
                             child: Text('#'+pokemon.nextEvo[0]['num'])
                           ),
+                          Center(
+                            child: Container(
+                              width: 60.0,
+                              height: 60.0,
+                              child:Image.network(pokeList[pokemon.id].url))
+                      )
                         ],
                         ),
                       ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: Column(
                         children: <Widget>[
                           Center(
@@ -375,6 +517,12 @@ class PokemonInfoPage extends StatelessWidget{
                           Center(
                             child: Text('#'+pokemon.nextEvo[1]['num'])
                           ),
+                          Center(
+                            child: Container(
+                              width: 60.0,
+                              height: 60.0,
+                              child:Image.network(pokeList[pokemon.id+1].url))
+                      )
                         ],
                       ),
                     ),
@@ -394,6 +542,13 @@ class PokemonInfoPage extends StatelessWidget{
                       Center(
                         child: Text('#'+pokemon.prevEvo[0]['num'])
                       ),
+                      Center(
+                        child: Container(
+                          width: 60.0,
+                          height: 60.0,
+                          child:Image.network(pokeList[pokemon.id-2].url))
+                      )
+                      
                     ],
                   ),
                 ),
@@ -407,6 +562,13 @@ class PokemonInfoPage extends StatelessWidget{
                       Center(
                         child: Text('#'+pokemon.idNum)
                       ),
+                      Center(
+                        child: Container(
+                          width: 60.0,
+                          height: 60.0,
+                          child:Image.network(pokemon.url))
+                      )
+
                     ],
                   ),
                 ),
@@ -414,7 +576,7 @@ class PokemonInfoPage extends StatelessWidget{
               : pokemon.prevEvo.length == 2
               ?<Widget>[
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Column(
                     children: <Widget>[
                       Center(
@@ -423,11 +585,17 @@ class PokemonInfoPage extends StatelessWidget{
                       Center(
                         child: Text('#'+pokemon.prevEvo[0]['num'])
                       ),
+                      Center(
+                        child: Container(
+                          width: 60.0,
+                          height: 60.0,
+                          child:Image.network(pokeList[pokemon.id-3].url))
+                      )
                     ],
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Column(
                     children: <Widget>[
                       Center(
@@ -436,11 +604,17 @@ class PokemonInfoPage extends StatelessWidget{
                       Center(
                         child: Text('#'+pokemon.prevEvo[1]['num'])
                      ),
+                     Center(
+                        child: Container(
+                          width: 60.0,
+                          height: 60.0,
+                          child:Image.network(pokeList[pokemon.id-2].url))
+                      )
                     ],
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Column(
                     children: <Widget>[
                       Center(
@@ -449,6 +623,12 @@ class PokemonInfoPage extends StatelessWidget{
                       Center(
                         child: Text('#'+pokemon.idNum)
                       ),
+                      Center(
+                        child: Container(
+                          width: 60.0,
+                          height: 60.0,
+                          child:Image.network(pokemon.url))
+                      )
                     ],
                   ),
                 ),
@@ -458,7 +638,7 @@ class PokemonInfoPage extends StatelessWidget{
             :pokemon.prevEvo != null && pokemon.nextEvo != null
             ?<Widget>[
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Column(
                   children: <Widget>[
                     Center(
@@ -467,11 +647,17 @@ class PokemonInfoPage extends StatelessWidget{
                     Center(
                       child: Text('#'+pokemon.prevEvo[0]['num'])
                     ),
+                    Center(
+                        child: Container(
+                          width: 60.0,
+                          height: 60.0,
+                          child:Image.network(pokeList[pokemon.id-2].url))
+                      )
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Column(
                   children: <Widget>[
                     Center(
@@ -480,11 +666,17 @@ class PokemonInfoPage extends StatelessWidget{
                     Center(
                       child: Text('#'+pokemon.idNum)
                     ),
+                    Center(
+                      child: Container(
+                        width: 60.0,
+                        height: 60.0,
+                        child:Image.network(pokemon.url))
+                    )
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Column(
                   children: <Widget>[
                     Center(
@@ -493,6 +685,12 @@ class PokemonInfoPage extends StatelessWidget{
                     Center(
                       child: Text('#'+pokemon.nextEvo[0]['num'])
                     ),
+                    Center(
+                        child: Container(
+                          width: 60.0,
+                          height: 60.0,
+                          child:Image.network(pokeList[pokemon.id].url))
+                      )
                   ],
                 ),
               ),
@@ -500,8 +698,86 @@ class PokemonInfoPage extends StatelessWidget{
             :null
           )
           : null
-        )
+        ),
 
+        //Creates the Egg section of the listivew
+        Container(
+          padding: const EdgeInsets.only(top: 20.0),
+          child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                child: Column(
+                    children: <Widget>[
+                      Container( 
+                        child: Center(
+                          child: Text('Egg', style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold),),
+                        ),
+                      ),
+                      Container(
+                        child: Center(
+                          child: pokemon.egg == '2 km'
+                          ?Image.network('https://vignette.wikia.nocookie.net/pokemongo/images/f/f2/Egg_2k.png/revision/latest?cb=20161024212924')
+                          :pokemon.egg == '5 km'
+                          ?Image.network('https://vignette.wikia.nocookie.net/pokemongo/images/3/33/Egg_5k.png/revision/latest?cb=20161024212930&format=original')
+                          :pokemon.egg == '7 km'
+                          ?Image.network('https://vignette.wikia.nocookie.net/pokemongo/images/f/f5/Egg_7k.png/revision/latest?cb=20180620120317')
+                          :pokemon.egg == '10 km'
+                          ?Image.network('https://vignette.wikia.nocookie.net/pokemongo/images/f/f6/Egg_10k.png/revision/latest?cb=20161024212937')
+                          :null
+                        )
+                      ),
+                      Container(
+                        child: Center(
+                          child: Text(pokemon.egg, style: TextStyle(fontSize: 18.0,),),
+                        ),
+                      )
+                    ],
+                  ),
+              ),
+        ),
+
+        //Creates the Spawn chance and Spawn time of the listview
+        Container(
+            padding: const EdgeInsets.only(top:20.0),
+            child:Row(
+              children: <Widget>[                
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                  child: Column(
+                    children: <Widget>[
+                      Container( 
+                        child: Center(
+                          child: Text('Spawn Chance', style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold),),
+                        ),
+                      ),
+                      
+                      Container(
+                        child: Center(
+                          child: Text('% '+pokemon.spawnChance, style: TextStyle(fontSize: 18.0,),),
+                        ),
+                      )
+                    ],
+                  )
+                ),
+                Container(
+                  child: Column(
+                    children: <Widget>[
+                      Container( 
+                        child: Center(
+                          child: Text('Spawn Time', style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold),),
+                        ),
+                      ),
+                      
+                      Container(
+                        child: Center(
+                          child: Text(pokemon.spawnTime, style: TextStyle(fontSize: 18.0,),),
+                        ),
+                      )
+                    ],
+                  )
+                ),
+              ],
+            )
+         ),
         ],
 
       )
@@ -512,14 +788,23 @@ class PokemonInfoPage extends StatelessWidget{
 
 }
 
-
+//Main Pokedex Page
 class PokeDexState extends State<MyApp>{
 
 StreamController<Pokemon> streamController;
 TextEditingController controller = new TextEditingController();
-List<Pokemon> list = [];
+List<Pokemon> pokemonList = [];
 List<Pokemon> searchResults = [];
-  
+
+/*
+Async function that creates a List<Pokemon> called searchResults that contain Pokemon that are related to the search.
+
+Function is called everytime the text is changed within the search textfield.
+
+Pokemon are searched by their name, ID number and type
+
+Function takes in a String text, which is the current string in the textfield.
+*/  
 onSearchTextChanged(String text) async{
   searchResults.clear();
   if(text.isEmpty){
@@ -528,7 +813,7 @@ onSearchTextChanged(String text) async{
     });
   }
   
-  list.forEach((pokemonItem){
+  pokemonList.forEach((pokemonItem){
     text = text[0].toUpperCase() + text.substring(1);
     if(pokemonItem.type.length == 1){
     if(pokemonItem.name.contains(text) || pokemonItem.idNum.contains(text) || pokemonItem.type[0].contains(text))
@@ -545,10 +830,9 @@ onSearchTextChanged(String text) async{
     });
 }
 
-
+ //Streams the data from the Json file and maps the information to the Pokemon class
  load(StreamController sc) async{
-   //String url = "https://raw.githubusercontent.com/Biuni/PokemonGO-Pokedex/master/pokedex.json";
-   String url = "https://raw.githubusercontent.com/realim1/pokemonGo-json/master/PokemonGo.json?token=AiSE9sALOVrNB1Yqu5EgEW9vCDjcdclwks5bNtznwA%3D%3D";
+   String url = "https://raw.githubusercontent.com/realim1/pokemonGo-json/master/PokemonGo.json?token=AiSE9jxlXonKTqjXXzejZTpprxeAvc3Wks5bP8nMwA%3D%3D";
    var client = http.Client();
 
    var req = http.Request('get', Uri.parse(url));
@@ -563,7 +847,7 @@ onSearchTextChanged(String text) async{
     .pipe(streamController);
     
  }
-
+  //Function used to close the stream when data is finished loading
   @override
   void dispose(){
     super.dispose();
@@ -571,30 +855,28 @@ onSearchTextChanged(String text) async{
     streamController = null;
   }
 
+  
+  //Initial function that is called at the start of the application to setup the streaming & load pokemon data from json file.
   @override
   void initState(){
     super.initState();
     streamController = StreamController.broadcast();
 
     streamController.stream.listen((p) =>
-      setState(() => list.add(p)
+      setState(() => pokemonList.add(p)
       )); 
 
     load(streamController);
   }
 
+  
+  //Builds the initial page that contains a Listview of the Pokemon and functional search bar. 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Pokédex'),
         backgroundColor: Colors.red,
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.filter_list),
-            onPressed: null,
-          )
-        ],
         
       ),
       body: Column(
@@ -636,9 +918,14 @@ onSearchTextChanged(String text) async{
     );
   }
 
+  /* 
+  Function that returns a Widget Containing Pokemon's Name, ID Number and Image(retrieved through url).
+  This function is dedicated for creating the Widgets for the whole PokemonList Listview.
 
+  Function takes in an integer index used to retrieve pokemon information from the list.
+  */
   Widget _createWholeList(int index){
-    if(index >= list.length){
+    if(index >= pokemonList.length){
       return null;
     }
 
@@ -646,7 +933,8 @@ onSearchTextChanged(String text) async{
           onTap: (){
             Navigator.push(context, new MaterialPageRoute(
               builder: (BuildContext context) => new PokemonInfoPage(
-                list[index]
+                pokemonList[index],
+                pokemonList
               ),
             ));
           },
@@ -660,22 +948,21 @@ onSearchTextChanged(String text) async{
                       children: <Widget>[
                         Container(
                           child: Center(
-                            child: Text(list[index].name, style: TextStyle(fontSize: 20.0),)
+                            child: Text(pokemonList[index].name, style: TextStyle(fontSize: 20.0),)
                             ) 
                           ),
                         
                         Container(
                           child: Center(
-                            child: Text('#'+list[index].idNum, style: TextStyle(fontSize: 18.0),)
+                            child: Text('#'+pokemonList[index].idNum, style: TextStyle(fontSize: 18.0),)
                             ) 
                           ),
 
                         Container(
                           child: Center(
-                            child: Image.network(list[index].url, )
+                            child: Image.network(pokemonList[index].url, )
                             ) 
-                          ),
-                        
+                          ),           
                       ],
                     )
                   )
@@ -684,7 +971,12 @@ onSearchTextChanged(String text) async{
             )
             ));
   }
+  /* 
+  Function that returns a Widget Containing Pokemon's Name, ID Number and Image(retrieved through url).
+  This function is dedicated for creating the Widgets for the searchResult Listview.
 
+  Function takes in an integer index used to retrieve pokemon information from the list.
+  */
   Widget _createSearchResultList(int index){
     if(index >= searchResults.length){
       return null;
@@ -694,7 +986,9 @@ onSearchTextChanged(String text) async{
           onTap: (){
             Navigator.push(context, new MaterialPageRoute(
               builder: (BuildContext context) => new PokemonInfoPage(
-                searchResults[index]
+                searchResults[index],
+                pokemonList
+                
               ),
             ));
           },
