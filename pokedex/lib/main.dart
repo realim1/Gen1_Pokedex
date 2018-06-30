@@ -1,3 +1,17 @@
+/*
+
+Created by Markus Realica - https://github.com/realim1
+
+Credit: Banner Images - https://www.deviantart.com/elbarnzo
+
+Flutter Application that displays a list of 1st Generation Pokemon and displays 
+information on that Pokemon, similarly to a standarded PokeDex. The application
+retrieves Pokemon information from a Json file that located on my Github. Currently it only 
+includes the first 151 Pokemon and displays information for PokemonGo users, but in
+the future I hope to include more Pokemon and increase the information on them.
+  */
+
+
 import 'dart:async';
 import 'dart:convert';
 
